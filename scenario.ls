@@ -838,7 +838,6 @@ exportScenario \blindPursuit, (env) ->*
 
 	env.controls.change (btn, isOn) !->
 		if btn == "catch" and isOn and screen.object.visible
-			console.log "Catching"
 			catcher.catch()
 
 
@@ -846,7 +845,6 @@ exportScenario \blindPursuit, (env) ->*
 		catcher.tick dt
 		env.renderer.render catcher.scene, catcher.camera, screen.renderTarget, true
 
-	#scene.draftIndicator.el.hide()
 	@let \scene, scene
 
 	yield @get \run
