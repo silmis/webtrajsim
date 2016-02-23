@@ -152,7 +152,6 @@ export runScenario = seqr.bind (scenarioLoader, ...args) !->*
 	env.logger.write loadingScenario: scenarioLoader.scenarioName
 	scenario = scenarioLoader env, ...args
 
-
 	intro = P.resolve undefined
 	me = @
 	scenario.get \intro .then (introContent) ->

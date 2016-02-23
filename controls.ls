@@ -116,6 +116,47 @@ export NonSteeringControl = (orig) ->
 	ctrl.steering = 0
 	return ctrl
 
+export class TargetSpeedController2
+	(@target=0) ->
+		@throttle = 0
+		@brake = 0
+		@steering = 0
+		@direction = 1
+		@accel_multiplier = 1.0
+		@brake_multiplier = 2.0
+		@_accel = 0
+		@_speed = 0
+		@_force = 0
+
+	tick: (speed, dt) ->
+		@_accel = (@_speed - speed)/dt
+		@_speed = speed
+		delta = @target - speed
+		if delta > 0
+			@_force += 0.003
+		else
+			@_force -= 0.003
+
+		#t = 1/(Math.abs(@target - speed) ^ 0.5*3)
+		#accelTarget = (@target - speed) / t
+		#delta = accelTarget - @_accel
+		#@_force = @_force + delta / 50
+		
+		@_force = Math.max @_force, -1
+		@_force = Math.min @_force, 1
+		if @_force > 0
+			@throttle = @_force
+			@brake = 0
+		else
+			@brake = -@_force
+			@throttle = 0
+
+		console.log 'speed', @_speed
+		console.log 'target', @target
+		console.log 'delta', delta
+		console.log 'force', @_force
+
+	set: ->
 
 export class TargetSpeedController
 	(@target=0) ->
@@ -131,7 +172,12 @@ export class TargetSpeedController
 			@throttle = force
 			@brake = 0
 		else
-			@brake = force
+			@brake = -force
 			@throttle = 0
+
+		console.log 'speed', speed
+		console.log 'target', @target
+		console.log 'delta', delta
+		console.log 'force', force
 
 	set: ->

@@ -50,3 +50,7 @@ export mergeObject = (root) ->
 		merged.add sub
 	merged.applyMatrix root.matrix
 	return merged
+
+export permuteList = (lst) ->
+	lst[..*-1]
+	return lst

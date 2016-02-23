@@ -94,6 +94,10 @@
 	<p>Tässä tehtävässä ei ole nopeusrajoituksia.</p>
 	"""
 
+'%easyRider.intro': """
+	<p>testing</p>
+	"""
+
 'Draft saving': 'Ilmanvastussäästö'
 'Average consumption': 'Keskikulutus'
 'Current consumption': 'Hetkellinen kulutus'

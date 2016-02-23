@@ -6,10 +6,10 @@ scenario = require './scenario.ls'
 
 L = (s) -> s
 
-runUntilPassed = seqr.bind (scenarioLoader, {passes=2, maxRetries=5}={}) ->*
+runUntilPassed = seqr.bind (scenarioLoader, {passes=2, maxRetries=5, params={}}={}) ->*
 	currentPasses = 0
 	for retry from 1 til Infinity
-		task = runScenario scenarioLoader
+		task = runScenario scenarioLoader, params
 		result = yield task.get \done
 		currentPasses += result.passed
 
@@ -62,8 +62,38 @@ export mulsimco2015 = seqr.bind ->*
 	env.let \destroy
 	yield env
 
+{permuteList} = require './utils.ls'
+export mulsimco2016_easyrider = seqr.bind ->*
+	env = newEnv!
+	#yield scenario.participantInformation yield env.get \env
+	env.let \destroy
+	yield env
+	
+	speeds = [10, 30, 60, 90]
+	permutations = permuteList speeds
+	console.log permutations
 
-export defaultExperiment = mulsimco2015
+	#blockinfo =
+	#	stuff: 'ok'		
+
+	#env.logger.write blockinfo
+
+	yield runUntilPassed scenario.easyRider, passes: 1, maxRetries: 3, params: sequence: speeds
+
+	ntrials = 1
+	scenarios = []
+		.concat([scenario.easyRider]*ntrials)
+	scenarios = shuffleArray scenarios
+
+	for scn in scenarios
+		yield runScenario scn, sequence:speeds
+
+	env = newEnv!
+	yield scenario.experimentOutro yield env.get \env
+	env.let \destroy
+	yield env
+
+export defaultExperiment = mulsimco2016_easyrider
 
 export freeDriving = seqr.bind ->*
 	yield runScenario scenario.freeDriving
