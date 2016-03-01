@@ -3,6 +3,7 @@ P = require 'bluebird'
 seqr = require './seqr.ls'
 {runScenario, newEnv} = require './scenarioRunner.ls'
 scenario = require './scenario.ls'
+{flatten} = require 'prelude-ls'
 
 L = (s) -> s
 
@@ -66,27 +67,38 @@ export mulsimco2015 = seqr.bind ->*
 export mulsimco2016_easyrider = seqr.bind ->*
 	env = newEnv!
 	#yield scenario.participantInformation yield env.get \env
+	logger = (yield env.get(\env)).logger
 	env.let \destroy
 	yield env
 	
-	speeds = [10, 30, 60, 90]
+	blocksize = 2
+	speeds = [10, 30, 60, 80]
+
 	permutations = permuteList speeds
+	permutations = shuffleArray permutations
+	[p.push(0) for p in permutations]
+	block_i = [x*blocksize for x from 0 to permutations.length/blocksize]
+	
 	console.log permutations
 
-	#blockinfo =
-	#	stuff: 'ok'		
+	blocks = []
+	for i from 0 to block_i.length-2
+		b = permutations.slice(block_i[i], block_i[i+1])
+		blocks.push(flatten(b))
 
-	#env.logger.write blockinfo
+	experimentInfo =
+		easyRiderRandomSequence: permutations		
+	logger.write experimentInfo
 
-	yield runUntilPassed scenario.easyRider, passes: 1, maxRetries: 3, params: sequence: speeds
-
-	ntrials = 1
-	scenarios = []
-		.concat([scenario.easyRider]*ntrials)
-	scenarios = shuffleArray scenarios
-
-	for scn in scenarios
-		yield runScenario scn, sequence:speeds
+	for i from 0 to blocks.length
+		blk = blocks[i]
+		yield runUntilPassed scenario.easyRider,
+			passes: 1,
+			maxRetries: 2,
+			params: 
+				sequence: blk
+				currentSegment: i
+				segmentNro: blocks.length
 
 	env = newEnv!
 	yield scenario.experimentOutro yield env.get \env

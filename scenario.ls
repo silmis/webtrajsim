@@ -453,23 +453,16 @@ class MicrosimWrapper
 	step: ->
 
 {knuthShuffle: shuffleArray} = require 'knuth-shuffle'
-
-{TargetSpeedController} = require './controls.ls'
 {TargetSpeedController2} = require './controls.ls'
-easyRider = exportScenario \easyRider, (env, {distance=2000, sequence}={}) ->*
+
+easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentNro}={}) ->*
 	L = env.L
 	@let \intro,
 		title: L "Easy Rider"
-		content: $ L "%easyRider.intro"
+		content: $ L "%easyRider.intro", currentSegment: currentSegment+1, segmentNro: segmentNro
 
 	scene = yield basePedalScene env
     
-	goalDistance = distance
-	finishSign = yield assets.FinishSign!
-	finishSign.position.z = goalDistance
-	finishSign.addTo scene
-	finishSign.visual.visible = false
-
 	scene.player.onCollision (e) ~>
 		reason = L "You crashed!"
 		if e.body.objectClass == "traffic-light"
@@ -479,12 +472,6 @@ easyRider = exportScenario \easyRider, (env, {distance=2000, sequence}={}) ->*
 			content: reason
 		return false
 
-	maximumFuelFlow = 200/60/1000
-	constantConsumption = maximumFuelFlow*0.1
-	draftingCoeff = (d) ->
-		# Estimated from Mythbusters!
-		Math.exp(0) - Math.exp(-(d + 5.6)*0.1)
-
 	scene.afterPhysics.add (dt) !->
 		return if not startTime?
 
@@ -493,21 +480,40 @@ easyRider = exportScenario \easyRider, (env, {distance=2000, sequence}={}) ->*
 	leader.physical.position.x = -1.75
 	leader.physical.position.z = 10
 
-	#speeds = [10, 30, 0, 60, 0, 90]
-	#shuffleArray speeds
-	#while speeds[*-1] == 0
-	#	shuffleArray speeds
+	blockinfo =
+		blockSequence: sequence
+		currentSegment: currentSegment		
+	env.logger.write blockinfo
 
-	speeds = sequence
-	speedDuration = 20
+	speeds = [s/3.6 for s in sequence]
+	stayOnSpeedTarget = 15
+	stayOnZeroTarget = 5
+	stayOnTarget = stayOnSpeedTarget
+	timeOnTarget = 0
 
-	sequence = for speed, i in speeds
-		[(i+1)*speedDuration, speed/3.6]
+	scene.afterPhysics.add (dt) !~>
+		#console.log 'speed diff' (Math.abs(speeds[0] - leader.physical.velocity.z))
+		#console.log 'tot' timeOnTarget, speeds.length
 
-	scene.afterPhysics.add (dt) ->
-		if scene.time > sequence[0][0] and sequence.length > 1
-			sequence := sequence.slice(1)
-		leaderControls.target = sequence[0][1]
+		if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 1.0
+			timeOnTarget += dt
+
+		if timeOnTarget >= stayOnTarget and sequence.length >= 1
+			speeds := speeds.slice(1)
+			timeOnTarget := 0
+			if speeds[0] == 0
+				stayOnTarget := stayOnZeroTarget
+			else
+				stayOnTarget := stayOnSpeedTarget
+			env.logger.write changeLimit: speeds[0]
+
+		if speeds.length == 0
+			@let \done, passed: true, outro:
+				title: L "Passed!"
+				content: L '%easyRider.outro'
+			return false
+		
+		leaderControls.target = speeds[0]
 		leaderControls.tick leader.getSpeed(), dt
 
 	headway =
@@ -526,10 +532,6 @@ easyRider = exportScenario \easyRider, (env, {distance=2000, sequence}={}) ->*
 		rawDist = scene.player.physical.position.distanceTo leader.physical.position
 		return rawDist - scene.player.physical.boundingRadius - leader.physical.boundingRadius
 
-	finishSign.bodyPassed(scene.player.physical).then ~>
-		@let \done, passed: true, outro:
-			title: L "Passed!"
-			content: L '%followInTraffic.outro', consumption: consumption
 	@let \scene, scene
 	yield @get \run
 	yield P.delay 1000

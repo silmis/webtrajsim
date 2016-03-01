@@ -116,6 +116,13 @@ export NonSteeringControl = (orig) ->
 	ctrl.steering = 0
 	return ctrl
 
+# OMG! https://code.google.com/p/v8/issues/detail?id=3495
+tanh = (x) ->
+	r = Math.tanh x
+	if r != r
+		return Math.sign x
+	return r
+
 export class TargetSpeedController2
 	(@target=0) ->
 		@throttle = 0
@@ -123,7 +130,7 @@ export class TargetSpeedController2
 		@steering = 0
 		@direction = 1
 		@accel_multiplier = 1.0
-		@brake_multiplier = 2.0
+		@brake_multiplier = 0.2
 		@_accel = 0
 		@_speed = 0
 		@_force = 0
@@ -131,11 +138,19 @@ export class TargetSpeedController2
 	tick: (speed, dt) ->
 		@_accel = (@_speed - speed)/dt
 		@_speed = speed
-		delta = @target - speed
-		if delta > 0
-			@_force += 0.003
+		
+		speedDelta = @target - speed
+		if speedDelta > 0
+			targetAccel = speedDelta * @accel_multiplier
 		else
-			@_force -= 0.003
+			targetAccel = speedDelta * @brake_multiplier
+		@_force = tanh targetAccel
+		
+		#delta = @target - speed
+		#if delta > 0
+		#	@_force += 0.002
+		#else
+		#	@_force -= 0.001
 
 		#t = 1/(Math.abs(@target - speed) ^ 0.5*3)
 		#accelTarget = (@target - speed) / t
@@ -151,10 +166,10 @@ export class TargetSpeedController2
 			@brake = -@_force
 			@throttle = 0
 
-		console.log 'speed', @_speed
-		console.log 'target', @target
-		console.log 'delta', delta
-		console.log 'force', @_force
+		#console.log 'speed', @_speed
+		#console.log 'target', @target
+		#console.log 'delta', delta
+		#console.log 'force', @_force
 
 	set: ->
 

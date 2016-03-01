@@ -2,7 +2,7 @@ THREE = require 'three'
 window.THREE = THREE
 require './three.js/examples/js/loaders/ColladaLoader.js'
 P = require 'bluebird'
-{findIndex} = require 'prelude-ls'
+{findIndex, flatten} = require 'prelude-ls'
 
 export loadCollada = (path) -> new P (resolve, reject) ->
 	loader = new THREE.ColladaLoader
@@ -52,5 +52,15 @@ export mergeObject = (root) ->
 	return merged
 
 export permuteList = (lst) ->
-	lst[..*-1]
-	return lst
+	if lst.length == 1
+		return lst
+	res = []
+	for item in lst
+		removed = [x for x in lst when x != item]
+		perms = permuteList(removed)
+		for i in perms
+			ar = []
+			ar.push item, i
+			ar = flatten ar
+			res.push ar
+	return res
