@@ -95,12 +95,13 @@
 	"""
 
 '%easyRider.intro': ({currentSegment, segmentNro}) -> """
-	<p>Tehtävänäsi on ajaa edelläajavan auton perässä. Ajon aikana auto jarruttaa ja kiihdyttää eri aikoina, ja tehtävänäsi on pysyä turvallisen etäisyyden päässä siitä siten, että ajaminen tuntuu mukavalta eikä törmäystä synny. Mikäli törmäät edelläajavaan, joudut ajamaan osion uudelleen. Uudelleenajatettava osio voi olla pitkäkin, joten ole tarkkana!</p>
+	<p>Tehtävänäsi on ajaa edelläajavan auton perässä. Edelläajaja jarruttaa ja kiihdyttää silloin tällöin, ja tehtävänäsi on pysyä turvallisen etäisyyden päässä siitä siten, että ajaminen tuntuu mukavalta eikä törmäystä synny. Mikäli törmäät edelläajavaan, joudut ajamaan osion uudelleen. Uudelleenajatettava osio voi olla pitkäkin, joten ole tarkkana!</p>
 	<p>Kokeessa on kuusi osiota, jotka kestävät noin kymmenen minuuttia per osio. Koe kestää siis tunnista kahteen tuntiin.</p>
 	<p>Tämä on osio #{currentSegment} / #{segmentNro}</p>
 	"""
+
 '%easyRider.outro': """	
-	<p>Kulutuksesi oli blaa blaa</p>
+	<p></p>
 	"""
 
 'Draft saving': 'Ilmanvastussäästö'
