@@ -66,12 +66,12 @@ export mulsimco2015 = seqr.bind ->*
 {permuteList} = require './utils.ls'
 export mulsimco2016_easyrider = seqr.bind ->*
 	env = newEnv!
-	#yield scenario.participantInformation yield env.get \env
+	yield scenario.participantInformation yield env.get \env
 	logger = (yield env.get(\env)).logger
 	env.let \destroy
 	yield env
 	
-	blocksize = 2
+	blocksize = 4
 	speeds = [10, 30, 60, 80]
 
 	permutations = permuteList speeds
@@ -90,7 +90,9 @@ export mulsimco2016_easyrider = seqr.bind ->*
 		easyRiderRandomSequence: permutations		
 	logger.write experimentInfo
 
-	for i from 0 to blocks.length
+	console.log blocks.length
+
+	for i from 0 to blocks.length-1
 		blk = blocks[i]
 		yield runUntilPassed scenario.easyRider,
 			passes: 1,
