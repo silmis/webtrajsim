@@ -64,13 +64,20 @@ export mulsimco2015 = seqr.bind ->*
 	yield env
 
 {permuteList} = require './utils.ls'
-export mulsimco2016_easyrider = seqr.bind ->*
+export easyrider2016 = seqr.bind ->*
 	env = newEnv!
 	yield scenario.participantInformation yield env.get \env
 	logger = (yield env.get(\env)).logger
 	env.let \destroy
 	yield env
 	
+	# training
+	yield runUntilPassed scenario.closeTheGap, passes: 3
+	yield runUntilPassed scenario.throttleAndBrake, passes: 2
+	yield runUntilPassed scenario.speedControl, passes: 1
+	yield runUntilPassed scenario.inTraffic, passes: 1
+
+	# experiment
 	blocksize = 4
 	speeds = [10, 30, 60, 80]
 
@@ -79,8 +86,6 @@ export mulsimco2016_easyrider = seqr.bind ->*
 	[p.push(0) for p in permutations]
 	block_i = [x*blocksize for x from 0 to permutations.length/blocksize]
 	
-	console.log permutations
-
 	blocks = []
 	for i from 0 to block_i.length-2
 		b = permutations.slice(block_i[i], block_i[i+1])
@@ -107,7 +112,7 @@ export mulsimco2016_easyrider = seqr.bind ->*
 	env.let \destroy
 	yield env
 
-export defaultExperiment = mulsimco2016_easyrider
+export defaultExperiment = easyrider2016
 
 export freeDriving = seqr.bind ->*
 	yield runScenario scenario.freeDriving

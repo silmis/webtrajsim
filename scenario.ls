@@ -455,6 +455,84 @@ class MicrosimWrapper
 {knuthShuffle: shuffleArray} = require 'knuth-shuffle'
 {TargetSpeedController2} = require './controls.ls'
 
+inTraffic = exportScenario \inTraffic, (env) ->*
+	L = env.L
+	@let \intro,
+		title: L "Driving in traffic"
+		content: $ L "%inTraffic.intro"
+
+	scene = yield basePedalScene env
+    
+	scene.player.onCollision (e) ~>
+		reason = L "You crashed!"
+		@let \done, passed: false, outro:
+			title: L "Oops!"
+			content: reason
+		return false
+
+	scene.afterPhysics.add (dt) !->
+		return if not startTime?
+
+	leaderControls = new TargetSpeedController2
+	leader = yield addVehicle scene, leaderControls
+	leader.physical.position.x = -1.75
+	leader.physical.position.z = 10
+
+	speeds = [10,0,30,0,60,0,80,0]
+	speeds = [s/3.6 for s in speeds]
+	stayOnSpeedTarget = 15
+	stayOnZeroTarget = 5
+	stayOnTarget = stayOnSpeedTarget
+	timeOnTarget = 0
+
+	scene.afterPhysics.add (dt) !~>
+		#console.log 'speed diff' (Math.abs(speeds[0] - leader.physical.velocity.z))
+		#console.log 'tot' timeOnTarget, speeds.length
+
+		if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 1.0
+			timeOnTarget += dt
+
+		if timeOnTarget >= stayOnTarget and speeds.length >= 1
+			speeds := speeds.slice(1)
+			timeOnTarget := 0
+			if speeds[0] == 0
+				stayOnTarget := stayOnZeroTarget
+			else
+				stayOnTarget := stayOnSpeedTarget
+			env.logger.write changeLimit: speeds[0]
+
+		if speeds.length == 0
+			@let \done, passed: true, outro:
+				title: L "Passed!"
+				content: L '%inTraffic.outro'
+			return false
+		
+		leaderControls.target = speeds[0]
+		leaderControls.tick leader.getSpeed(), dt
+
+	headway =
+		cumulative: 0
+		time: 0
+		average: ->
+			@cumulative/@time
+	cumHeadway = 0
+	averageHeadway = 0
+	scene.afterPhysics (dt) ->
+		return if not startTime?
+		headway.cumulative += dt*distanceToLeader!
+		headway.time += dt
+
+	distanceToLeader = ->
+		rawDist = scene.player.physical.position.distanceTo leader.physical.position
+		return rawDist - scene.player.physical.boundingRadius - leader.physical.boundingRadius
+	
+	@let \scene, scene
+	yield @get \run
+	yield P.delay 1000
+	startTime = scene.time
+
+	return yield @get \done
+
 easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentNro}={}) ->*
 	L = env.L
 	@let \intro,
@@ -465,8 +543,6 @@ easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentN
     
 	scene.player.onCollision (e) ~>
 		reason = L "You crashed!"
-		if e.body.objectClass == "traffic-light"
-			reason = L "You ran the red light!"
 		@let \done, passed: false, outro:
 			title: L "Oops!"
 			content: reason
@@ -487,7 +563,7 @@ easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentN
 
 	speeds = [s/3.6 for s in sequence]
 	stayOnSpeedTarget = 15
-	stayOnZeroTarget = 5
+	stayOnZeroTarget = 7
 	stayOnTarget = stayOnSpeedTarget
 	timeOnTarget = 0
 
@@ -531,6 +607,8 @@ easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentN
 	distanceToLeader = ->
 		rawDist = scene.player.physical.position.distanceTo leader.physical.position
 		return rawDist - scene.player.physical.boundingRadius - leader.physical.boundingRadius
+	
+	scene.player.speedometer.el.hide()
 
 	@let \scene, scene
 	yield @get \run
@@ -850,6 +928,34 @@ exportScenario \participantInformation, (env) ->*
 				* value: 'monthly', label: L "Most months"
 				* value: 'yearly', label: L "Few times a year"
 				* value: 'none', label: L "Not at all"
+		->
+			@ \title .text L "Lifetime kilometrage"
+			@ \text .append L "Give out an estimate on how many kilometres have you driven during your lifetime."
+			@ \accept .text L "Next"
+			@ \cancel .text L "Previous"
+			@ \inputs .append radioSelect "drivingDist",
+				* value: '0', label: "<1000"
+				* value: '1000', label: "1000 - 10 000"
+				* value: '10000', label: "10 001 - 30 000"
+				* value: '30000', label: "30 001 - 100 000"
+				* value: '100000', label: "100 001 - 300 000"
+				* value: '300000', label: "300 001 - 500 000"
+				* value: '500000', label: "500 001 - 1 000 000"
+				* value: '1000000', label: "> 1 000 000"
+		->
+			@ \title .text L "Video games"
+			@ \text .append L "How frequently do you play video games?"
+			@ \accept .text L "Next"
+			@ \cancel .text L "Previous"
+			@ \inputs .append radioSelect "gamingFreq",
+				* value: 'daily', label: L "Most days"
+				* value: 'weekly', label: L "Most weeks"
+				* value: 'monthly', label: L "Most months"
+				* value: 'yearly', label: L "Few times a year"
+				* value: 'none', label: L "Not at all"
+				* value: 'ex-player', label: L "I have played, but not anymore"
+
+			.appendTo @ \inputs
 
 	i = 0
 	while i < dialogs.length
