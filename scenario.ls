@@ -566,12 +566,15 @@ easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentN
 	stayOnZeroTarget = 7
 	stayOnTarget = stayOnSpeedTarget
 	timeOnTarget = 0
+	
+	env.logger.write changeLimit: speeds[0]
+	console.log speeds[0]
 
 	scene.afterPhysics.add (dt) !~>
-		#console.log 'speed diff' (Math.abs(speeds[0] - leader.physical.velocity.z))
-		#console.log 'tot' timeOnTarget, speeds.length
+		console.log 'speed diff' (Math.abs(speeds[0] - leader.physical.velocity.z))
+		console.log 'tot' timeOnTarget, speeds.length
 
-		if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 1.0
+		if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 0.5
 			timeOnTarget += dt
 
 		if timeOnTarget >= stayOnTarget and sequence.length >= 1
