@@ -145,18 +145,11 @@ export class TargetSpeedController2
 		else
 			targetAccel = speedDelta * @brake_multiplier
 		@_force = tanh targetAccel
-		
-		#delta = @target - speed
-		#if delta > 0
-		#	@_force += 0.002
-		#else
-		#	@_force -= 0.001
+		#@_force = tanh (targetAccel - @_accel)*0.1
 
-		#t = 1/(Math.abs(@target - speed) ^ 0.5*3)
-		#accelTarget = (@target - speed) / t
-		#delta = accelTarget - @_accel
-		#@_force = @_force + delta / 50
-		
+		console.log 'speed', speed
+		console.log 'target', @target
+				
 		@_force = Math.max @_force, -1
 		@_force = Math.min @_force, 1
 		if @_force > 0
