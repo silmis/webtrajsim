@@ -20,9 +20,9 @@ def loadSession(f, sid):
 			if r['data'].has_key('loadingScenario'):
 				scenarioStarts.append((i, r['data']['loadingScenario']))
 		except ValueError as e:
-			#print >> sys.stderr, data[i]
+			print >> sys.stderr, data[i]
 			print >> sys.stderr, e
-			sys.exit() 
+			#sys.exit() 
 	
 	scenarioStarts.append((None, None))
 	
