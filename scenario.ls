@@ -481,7 +481,7 @@ inTraffic = exportScenario \inTraffic, (env) ->*
 	speeds = [10,0,30,0,60,0,80,0]
 	speeds = [s/3.6 for s in speeds]
 	stayOnSpeedTarget = 15
-	stayOnZeroTarget = 5
+	stayOnZeroTarget = 8
 	stayOnTarget = stayOnSpeedTarget
 	timeOnTarget = 0
 
@@ -562,8 +562,8 @@ easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentN
 	env.logger.write blockinfo
 
 	speeds = [s/3.6 for s in sequence]
-	stayOnSpeedTarget = 15
-	stayOnZeroTarget = 7
+	stayOnSpeedTarget = 25
+	stayOnZeroTarget = 8
 	stayOnTarget = stayOnSpeedTarget
 	timeOnTarget = 0
 	
