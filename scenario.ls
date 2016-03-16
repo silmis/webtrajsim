@@ -902,6 +902,14 @@ exportScenario \participantInformation, (env) ->*
 				* value: 'female', label: L "Female"
 				* value: 'male', label: L "Male"
 		->
+			@ \title .text L "Driving license"
+			@ \text .append L "What class is your driver's licence?"
+			@ \accept .text L "Next"
+			@ \cancel .text L "Previous"
+			input = $("""<input name="drivinglicenseclass" type="string" style="color: black">""")
+			.appendTo @ \inputs
+			setTimeout input~focus, 0
+		->
 			@ \title .text L "Driving license year"
 			@ \text .append L "%intro.license"
 			@ \accept .text L "Next"
@@ -910,28 +918,43 @@ exportScenario \participantInformation, (env) ->*
 			.appendTo @ \inputs
 			setTimeout input~focus, 0
 		->
-			@ \title .text L "Past year driving"
-			@ \text .append L "On average, how frequently have you driven during the <strong>past year</strong>."
+			#@ \title .text L "Past year driving"
+			#@ \text .append L "On average, how frequently have you driven during the <strong>past year</strong>."
+			#@ \accept .text L "Next"
+			#@ \cancel .text L "Previous"
+			#@ \inputs .append radioSelect "drivingFreqPastYear",
+			#	* value: 'daily', label: L "Most days"
+			#	* value: 'weekly', label: L "Most weeks"
+			#	* value: 'monthly', label: L "Most months"
+			#	* value: 'yearly', label: L "Few times a year"
+			#	* value: 'none', label: L "Not at all"
+		#->
+			#@ \title .text L "Lifetime driving"
+			#@ \text .append L "On average, how frequently have you driven <strong>since you got your driver's license</strong>."
+			#@ \accept .text L "Next"
+			#@ \cancel .text L "Previous"
+			#@ \inputs .append radioSelect "drivingFreqTotal",
+			#	* value: 'daily', label: L "Most days"
+			#	* value: 'weekly', label: L "Most weeks"
+			#	* value: 'monthly', label: L "Most months"
+			#	* value: 'yearly', label: L "Few times a year"
+			#	* value: 'none', label: L "Not at all"
+		#->
+			@ \title .text L "Past 12 month kilometrage"
+			@ \text .append L "Give out an estimate on how many kilometres have you driven during the past 12 months."
 			@ \accept .text L "Next"
 			@ \cancel .text L "Previous"
-			@ \inputs .append radioSelect "drivingFreqPastYear",
-				* value: 'daily', label: L "Most days"
-				* value: 'weekly', label: L "Most weeks"
-				* value: 'monthly', label: L "Most months"
-				* value: 'yearly', label: L "Few times a year"
-				* value: 'none', label: L "Not at all"
-		->
-			@ \title .text L "Lifetime driving"
-			@ \text .append L "On average, how frequently have you driven <strong>since you got your driver's license</strong>."
-			@ \accept .text L "Next"
-			@ \cancel .text L "Previous"
-			@ \inputs .append radioSelect "drivingFreqTotal",
-				* value: 'daily', label: L "Most days"
-				* value: 'weekly', label: L "Most weeks"
-				* value: 'monthly', label: L "Most months"
-				* value: 'yearly', label: L "Few times a year"
-				* value: 'none', label: L "Not at all"
-		->
+			@ \inputs .append radioSelect "drivingDist",
+				* value: 'None', label: L "not driven"
+				* value: '0', label: "<1000"
+				* value: '1000', label: "1000 - 5000"
+				* value: '5000', label: "5001 - 10 000"
+				* value: '100000', label: "10 001 - 15 000"
+				* value: '150000', label: "15 001 - 20 000"
+				* value: '200000', label: "20 001 - 30 000"
+				* value: '300000', label: "30 001 - 50 000"
+				* value: '500000', label: "> 50 000"
+		->	
 			@ \title .text L "Lifetime kilometrage"
 			@ \text .append L "Give out an estimate on how many kilometres have you driven during your lifetime."
 			@ \accept .text L "Next"
@@ -951,6 +974,18 @@ exportScenario \participantInformation, (env) ->*
 			@ \accept .text L "Next"
 			@ \cancel .text L "Previous"
 			@ \inputs .append radioSelect "gamingFreq",
+				* value: 'daily', label: L "Most days"
+				* value: 'weekly', label: L "Most weeks"
+				* value: 'monthly', label: L "Most months"
+				* value: 'yearly', label: L "Few times a year"
+				* value: 'none', label: L "Not at all"
+				* value: 'ex-player', label: L "I have played, but not anymore"
+		->
+			@ \title .text L "Driving games"
+			@ \text .append L "How frequently do you play driving games? (e.g. Gran Turismo)"
+			@ \accept .text L "Next"
+			@ \cancel .text L "Previous"
+			@ \inputs .append radioSelect "drivingGameFreq",
 				* value: 'daily', label: L "Most days"
 				* value: 'weekly', label: L "Most weeks"
 				* value: 'monthly', label: L "Most months"

@@ -144,15 +144,15 @@
 
 'Welcome to the experiment': 'Tervetuloa kokeeseen!'
 '%intro.introduction': """
-<p>Tämän kokeen tarkoituksena on tutkia autonkuljettajan nopeudensäätelyä,
-ennakointia ja tarkkaavaisuuden jakamista.
+<p>Tämän kokeen tarkoituksena on tutkia autonkuljettajan havainnointia ja nopeudensäätelyä
+maantieajossa.
 
 <p>Koe koostuu useasta osatehtävästä,
 jotka esitellään kokeen edetessä. Koe kestää kokonaisuudessaan noin tunnin.
 Voit kysyä kokeenjohtajalta lisätietoa sinulle epäselvistä asioista milloin tahansa.
 
 <p>Kokeen vastuullisena tutkijana toimii prof. Heikki Summala ja tutkijoina
-Jami Pekkanen, Teemu Itkonen ja Otto Lappi.
+Teemu Itkonen ja Jami Pekkanen.
 """
 
 'Participation is voluntary': 'Osallistuminen on vapaaehtoista'
@@ -187,10 +187,12 @@ siihen lähetetä tähän kokeeseen liittymätöntä viestintää."""
 'Female': 'Nainen'
 'Male': 'Mies'
 
+'Driving license': 'Ajokorttiluokka'
+"What class is your driver's licence?": """Sallitut ajoneuvoluokat"""
+
 'Driving license year': 'Kuljettajatutkinnon suoritus'
-'%intro.license': """Anna vuosi, jona olet saanut B-luokan ajo-oikeuden (henkilöauto).
-Jos sinulla ei ole kyseisen luokan ajo-oikeutta, jätä kenttä tyhjäksi. Tiedot löytyvät
-ajokortin kääntöpuolelta."""
+'%intro.license': """Anna vuosi, jona olet saanut B-luokan ajo-oikeuden (henkilöauto). 
+Tiedot löytyvät ajokortin kääntöpuolelta."""
 
 'Past year driving': 'Viimeisen vuoden ajaminen'
 "On average, how frequently have you driven during the <strong>past year</strong>.": """
@@ -208,12 +210,19 @@ Mikä seuraavista vastaa parhaiten sitä, kuinka usein olet ajanut keskimäärin
 "On average, how frequently have you driven <strong>since you got your driver's license</strong>.": """Mikä seuraavista vastaa parhaiten sitä, kuinka usein olet ajanut keskimäärin
 <strong>ajokortin saatuasi</strong>."""
 
-'Lifetime kilometrage': 'Ajokilometrit'
+'Past 12 month kilometrage': 'Ajokilometrit viimeisten 12 kk aikana'
+"Give out an estimate on how many kilometres have you driven during the past 12 months.": """Anna arviosi siitä,montako ajokilometriä olet ajanut viimeisen 12 kuukauden aikana."""
+'not driven': 'en yhtään'
+
+'Lifetime kilometrage': 'Ajokilometrit eliniän aikana'
 "Give out an estimate on how many kilometres have you driven during your lifetime.": """Anna arviosi siitä, montako ajokilometriä olet ajanut koko elämäsi aikana."""
 
 'Video games': 'Tietokonepelaaminen'
 "How frequently do you play video games?": """Kuinka usein pelaat tietokonepelejä?"""
 'I have played, but not anymore': 'Olen pelannut, mutta en tätä nykyä.'
+
+'Driving games': 'Ajopelit'
+"How frequently do you play driving games? (e.g. Gran Turismo)": """Kuinka usein pelaat ajopelejä? (esim. Gran Turismo)"""
 
 'The experiment is done!': 'Koe on päättynyt'
 '%experimentOutro': 'Kiitos osallistumisestasi!'
