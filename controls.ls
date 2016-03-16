@@ -138,17 +138,19 @@ export class TargetSpeedController2
 	tick: (speed, dt) ->
 		@_accel = (@_speed - speed)/dt
 		@_speed = speed
-		
-		speedDelta = @target - speed
-		if speedDelta > 0
-			targetAccel = speedDelta * @accel_multiplier
-		else
-			targetAccel = speedDelta * @brake_multiplier
-		@_force = tanh targetAccel
-		#@_force = tanh (targetAccel - @_accel)*0.1
 
-		console.log 'speed', speed
-		console.log 'target', @target
+		target = @target * 1.01754859 # wind resistance	
+		speedDelta = target - speed
+
+		if target == 0 and speedDelta < 0.1 # stopping hack
+			@_force = -0.5
+		else
+			if speedDelta > 0
+				targetAccel = speedDelta * @accel_multiplier
+			else
+				targetAccel = speedDelta * @brake_multiplier
+			@_force = tanh targetAccel
+			#@_force = tanh (targetAccel - @_accel) * 0.1
 				
 		@_force = Math.max @_force, -1
 		@_force = Math.min @_force, 1
