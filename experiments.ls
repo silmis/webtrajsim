@@ -74,7 +74,7 @@ export easyrider2016 = seqr.bind ->*
 	# training
 	yield runUntilPassed scenario.closeTheGap, passes: 3
 	yield runUntilPassed scenario.throttleAndBrake, passes: 2
-	yield runUntilPassed scenario.speedControl, passes: 1
+	yield runUntilPassed scenario.speedControl, passes: 2
 	yield runUntilPassed scenario.inTraffic, passes: 1
 
 	# experiment
