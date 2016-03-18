@@ -79,7 +79,7 @@ export easyrider2016 = seqr.bind ->*
 
 	# experiment
 	blocksize = 4
-	speeds = [10, 30, 60, 80]
+	speeds = [10, 30, 50, 80]
 
 	permutations = permuteList speeds
 	permutations = shuffleArray permutations

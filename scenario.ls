@@ -478,7 +478,7 @@ inTraffic = exportScenario \inTraffic, (env) ->*
 	leader.physical.position.x = -1.75
 	leader.physical.position.z = 10
 
-	speeds = [10,0,30,0,60,0,80,0]
+	speeds = [10,0,30,0,50,0,80,0]
 	speeds = [s/3.6 for s in speeds]
 	stayOnSpeedTarget = 15
 	stayOnZeroTarget = 8
