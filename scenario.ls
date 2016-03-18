@@ -232,6 +232,9 @@ failOnCollision = (env, scn, scene) ->
 		scn.let \done, passed: false, outro:
 			title: env.L "Oops!"
 			content: reason
+			
+		env.logger.write playerVehicleCollision:
+			collisionTarget: e.body.objectClass
 		return false
 
 exportScenario \closeTheGap, (env) ->*
