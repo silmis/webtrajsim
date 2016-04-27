@@ -66,7 +66,7 @@ export mulsimco2015 = seqr.bind ->*
 {permuteList} = require './utils.ls'
 export easyrider2016 = seqr.bind ->*
 	env = newEnv!
-	#yield scenario.participantInformation yield env.get \env
+	yield scenario.participantInformation yield env.get \env
 	logger = (yield env.get(\env)).logger
 	env.let \destroy
 	yield env
