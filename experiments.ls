@@ -3,7 +3,7 @@ P = require 'bluebird'
 seqr = require './seqr.ls'
 {runScenario, newEnv} = require './scenarioRunner.ls'
 scenario = require './scenario.ls'
-{flatten} = require 'prelude-ls'
+{flatten, zip, elem-indices, concat} = require 'prelude-ls'
 
 L = (s) -> s
 
@@ -66,44 +66,80 @@ export mulsimco2015 = seqr.bind ->*
 {permuteList} = require './utils.ls'
 export easyrider2016 = seqr.bind ->*
 	env = newEnv!
-	yield scenario.participantInformation yield env.get \env
+	#yield scenario.participantInformation yield env.get \env
 	logger = (yield env.get(\env)).logger
 	env.let \destroy
 	yield env
 	
 	# training
-	yield runUntilPassed scenario.closeTheGap, passes: 3
-	yield runUntilPassed scenario.throttleAndBrake, passes: 2
-	yield runUntilPassed scenario.speedControl, passes: 1
-	yield runUntilPassed scenario.inTraffic, passes: 1
+	#yield runUntilPassed scenario.closeTheGap, passes: 3
+	#yield runUntilPassed scenario.throttleAndBrake, passes: 2
+	#yield runUntilPassed scenario.speedControl, passes: 1
+	#yield runUntilPassed scenario.inTraffic, passes: 1
 
 	# experiment
 	blocksize = 4
 	speeds = [10, 30, 50, 80]
+	accel_params = [[1.0, 0.1], [0.6, 0.075], [0.4, 0.05]]	
 
+	# speeds
 	permutations = permuteList speeds
 	permutations = shuffleArray permutations
 	[p.push(0) for p in permutations]
-	block_i = [x*blocksize for x from 0 to permutations.length/blocksize]
 	
-	blocks = []
+	# accelerations, this is terrible
+	assigned = {}
+	acp_list = []
+
+	flat = flatten(permutations)
+	[a, b] = [(flat.slice i) for i from 0 to 1]
+	pairs = zip a, b
+	for p in pairs
+		assigned[p] = []
+
+	for p in pairs
+		loop
+			select = Math.floor (Math.random! * accel_params.length)
+			count = elem-indices accel_params[select], assigned[p]
+			count = count.length
+			if count >= 2
+				continue
+			else
+				acp_list.push accel_params[select]
+				assigned[p].push accel_params[select]
+				break
+
+	acp_list.splice 0, 0, [1, 0.1] # FIXME
+	seq = [i * (speeds.length+1) for i from 0 to permutations.length]
+	acp_sliced = [acp_list.slice i, i+(speeds.length+1) for i in seq]
+	acp_sliced = acp_sliced.slice  0, -1
+
+	# chop up to blocks
+	block_i = [x*blocksize for x from 0 to permutations.length/blocksize]	
+	block_speeds = []
+	block_accels = []
 	for i from 0 to block_i.length-2
-		b = permutations.slice(block_i[i], block_i[i+1])
-		blocks.push(flatten(b))
+		bs = permutations.slice block_i[i], block_i[i+1]
+		ba = acp_sliced.slice block_i[i], block_i[i+1]
+		block_speeds.push flatten bs
+		block_accels.push concat ba
 
 	experimentInfo =
-		easyRiderRandomSequence: permutations		
+		easyRiderRandomSequence: permutations
+		easyRiderAccelParameters: acp_sliced	
 	logger.write experimentInfo
 
-	for i from 0 to blocks.length-1
-		blk = blocks[i]
+	for i from 0 to block_speeds.length-1
+		blk_s = block_speeds[i]
+		blk_a = block_accels[i]
 		yield runUntilPassed scenario.easyRider,
 			passes: 1,
 			maxRetries: 2,
 			params: 
-				sequence: blk
+				sequence: blk_s
+				acceleration: blk_a
 				currentSegment: i
-				segmentNro: blocks.length
+				segmentNro: block_speeds.length
 
 	env = newEnv!
 	yield scenario.experimentOutro yield env.get \env

@@ -536,7 +536,8 @@ inTraffic = exportScenario \inTraffic, (env) ->*
 
 	return yield @get \done
 
-easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentNro}={}) ->*
+{rnorm} = require 'randgen'
+easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSegment, segmentNro}={}) ->*
 	L = env.L
 	@let \intro,
 		title: L "Easy Rider"
@@ -551,6 +552,8 @@ easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentN
 			content: reason
 		return false
 
+	console.log acceleration
+
 	scene.afterPhysics.add (dt) !->
 		return if not startTime?
 
@@ -561,33 +564,55 @@ easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentN
 
 	blockinfo =
 		blockSequence: sequence
-		currentSegment: currentSegment		
+		currentSegment: currentSegment
+		blockAccelerationParams: acceleration	
 	env.logger.write blockinfo
 
 	speeds = [s/3.6 for s in sequence]
-	stayOnSpeedTarget = 25
-	stayOnZeroTarget = 8
+
+	stayOnSpeedTarget = 5
+	stayOnZeroTarget = 3
+	speedTargetSigma = 5
+	zeroTargetSigma = 2
+
 	stayOnTarget = stayOnSpeedTarget
 	timeOnTarget = 0
-	
+	freeToGo = false
+
 	env.logger.write changeLimit: speeds[0]
-	console.log speeds[0]
 
 	scene.afterPhysics.add (dt) !~>
-		console.log 'speed diff' (Math.abs(speeds[0] - leader.physical.velocity.z))
-		console.log 'tot' timeOnTarget, speeds.length
+		#console.log 'speed diff' (Math.abs(speeds[0] - leader.physical.velocity.z))
+		#console.log 'tot' timeOnTarget, speeds.length
 
-		if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 0.5
+		if speeds[0] == 0
+			if scene.player.physical.velocity.z <= 0
+				freeToGo := true
+				timeOnTarget += dt
+			else
+				freeToGo := false
+		else if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 0.5 # 0.5
 			timeOnTarget += dt
+			freeToGo := true
+		else
+			freeToGo := true
 
-		if timeOnTarget >= stayOnTarget and sequence.length >= 1
+		if timeOnTarget >= stayOnTarget and sequence.length >= 1 and freeToGo
 			speeds := speeds.slice(1)
+			acceleration := acceleration.slice(1)
 			timeOnTarget := 0
 			if speeds[0] == 0
-				stayOnTarget := stayOnZeroTarget
+				stayOnTarget := zeroTargetSigma * rnorm(0, 0.5) + stayOnZeroTarget
 			else
-				stayOnTarget := stayOnSpeedTarget
-			env.logger.write changeLimit: speeds[0]
+				stayOnTarget := speedTargetSigma * rnorm(0, 0.5) + stayOnSpeedTarget
+
+			speedinfo =
+				changeLimit: speeds[0]
+				changeAccel: acceleration[0]
+				stayOnLimit: stayOnTarget
+			env.logger.write speedinfo
+
+			#console.log speedinfo
 
 		if speeds.length == 0
 			@let \done, passed: true, outro:
@@ -596,6 +621,7 @@ easyRider = exportScenario \easyRider, (env, {sequence, currentSegment, segmentN
 			return false
 		
 		leaderControls.target = speeds[0]
+		leaderControls.accelParams = acceleration[0]
 		leaderControls.tick leader.getSpeed(), dt
 
 	headway =

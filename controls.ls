@@ -124,33 +124,51 @@ tanh = (x) ->
 	return r
 
 export class TargetSpeedController2
-	(@target=0) ->
+	(@target=0, @accelParams=[1.0, 0.1]) ->
 		@throttle = 0
 		@brake = 0
 		@steering = 0
 		@direction = 1
 		@accel_multiplier = 1.0
-		@brake_multiplier = 0.2
+		@brake_multiplier = 1.0
 		@_accel = 0
 		@_speed = 0
 		@_force = 0
+		@_cumulative_error = 0
+		@_pid_derivative = 0
+		@_speedDelta = 0
 
 	tick: (speed, dt) ->
 		@_accel = (@_speed - speed)/dt
 		@_speed = speed
+		kp = @accelParams[0]
+		ki = @accelParams[1]
 
-		target = @target * 1.01754859 # wind resistance	
+		# wind resistance	
+		#target = @target * 1.05  # 1.01754859 	
+		target = @target
+
 		speedDelta = target - speed
+		errorDelta = @_speedDelta - speedDelta
+		@_speedDelta = speedDelta
+		@_pid_derivative = errorDelta / dt
+
+		if target != 0
+			@_cumulative_error += speedDelta * dt
 
 		if target == 0 and speedDelta < 0.1 # stopping hack
 			@_force = -0.5
 		else
 			if speedDelta > 0
-				targetAccel = speedDelta * @accel_multiplier
+				targetAccel = speedDelta * kp #@accel_multiplier
 			else
-				targetAccel = speedDelta * @brake_multiplier
-			@_force = tanh targetAccel
-			#@_force = tanh (targetAccel - @_accel) * 0.1
+				targetAccel = speedDelta * kp #@brake_multiplier
+
+			targetAccel += ki * @_cumulative_error			
+			#targetAccel += 0.1 * @_cumulative_error #+ 2.0 * @_pid_derivative
+			@_force = DumbEngineModel targetAccel
+			
+			#@_force = tanh targetAccel
 				
 		@_force = Math.max @_force, -1
 		@_force = Math.min @_force, 1
@@ -161,10 +179,10 @@ export class TargetSpeedController2
 			@brake = -@_force
 			@throttle = 0
 
-		#console.log 'speed', @_speed
-		#console.log 'target', @target
-		#console.log 'delta', delta
-		#console.log 'force', @_force
+		console.log 'speed', @_speed
+		console.log 'target', @target
+		console.log 'kp, ki', kp, ki
+		console.log 'force', @_force
 
 	set: ->
 
@@ -185,9 +203,40 @@ export class TargetSpeedController
 			@brake = -force
 			@throttle = 0
 
-		console.log 'speed', speed
-		console.log 'target', @target
-		console.log 'delta', delta
-		console.log 'force', force
+		#console.log 'speed', speed
+		#console.log 'target', @target
+		#console.log 'delta', delta
+		#console.log 'force', force
 
 	set: ->
+
+logistic_function = (val, slope) ->
+	return 0	
+
+DumbEngineModel = (targetAccel) ->
+	knots = [[-19.150852756939567, -0.86960922500437798], 
+				[-10.0, -0.67314024428906383], 
+				[-4.0, -0.53092823365752206], 
+				[-2.5, -0.34978573520149692], 
+				[-1.7, -0.097415037510977784], 
+				[-1.2, 0.031117285095661945], 
+				[0.0, 0.26398121786496032], 
+				[3.0, 0.71245888265216406], 
+				[5.2096257357368652, 0.93516331581155065]]
+
+	if targetAccel < knots[0][0]
+		force = knots[0][1]
+	else if targetAccel > knots[knots.length-1][0]
+		force = knots[knots.length-1][1]
+	else
+		for k, i in knots
+			if k[0] > targetAccel
+				break
+		before = knots[i-1]
+		after = knots[i]
+
+		force = (targetAccel - before[0]) / (after[0] - before[0]) * (after[1] - before[1]) + before[1]
+					
+	#console.log targetAccel, force
+	return force
+	
