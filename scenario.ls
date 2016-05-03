@@ -570,7 +570,7 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 
 	speeds = [s/3.6 for s in sequence]
 
-	stayOnSpeedTarget = 5
+	stayOnSpeedTarget = 25
 	stayOnZeroTarget = 5
 	speedTargetSigma = 5
 	zeroTargetSigma = 2
