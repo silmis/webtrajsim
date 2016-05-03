@@ -560,7 +560,7 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 	leaderControls = new TargetSpeedController2
 	leader = yield addVehicle scene, leaderControls
 	leader.physical.position.x = -1.75
-	leader.physical.position.z = 10
+	leader.physical.position.z = 100 #10
 
 	blockinfo =
 		blockSequence: sequence
@@ -571,19 +571,18 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 	speeds = [s/3.6 for s in sequence]
 
 	stayOnSpeedTarget = 5
-	stayOnZeroTarget = 3
+	stayOnZeroTarget = 5
 	speedTargetSigma = 5
 	zeroTargetSigma = 2
 
 	stayOnTarget = stayOnSpeedTarget
 	timeOnTarget = 0
 	freeToGo = false
+	approach = true
 
 	env.logger.write changeLimit: speeds[0]
 
 	scene.afterPhysics.add (dt) !~>
-		#console.log 'speed diff' (Math.abs(speeds[0] - leader.physical.velocity.z))
-		#console.log 'tot' timeOnTarget, speeds.length
 
 		if speeds[0] == 0
 			if scene.player.physical.velocity.z <= 0
@@ -591,7 +590,7 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 				timeOnTarget += dt
 			else
 				freeToGo := false
-		else if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 0.5 # 0.5
+		else if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 0.5
 			timeOnTarget += dt
 			freeToGo := true
 		else
@@ -611,8 +610,8 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 				changeAccel: acceleration[0]
 				stayOnLimit: stayOnTarget
 			env.logger.write speedinfo
-
-			#console.log speedinfo
+	
+		#console.log 'go' , freeToGo
 
 		if speeds.length == 0
 			@let \done, passed: true, outro:
@@ -620,7 +619,18 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 				content: L '%easyRider.outro'
 			return false
 		
-		leaderControls.target = speeds[0]
+		dist = scene.player.physical.position.distanceTo leader.physical.position
+		dist = dist - scene.player.physical.boundingRadius - leader.physical.boundingRadius
+		
+		#console.log 'dist', dist
+		#console.log 'approach', approach
+			
+		if approach and (dist > 30)
+			leaderControls.target = 0
+		else
+			leaderControls.target = speeds[0]
+			approach := false
+
 		leaderControls.accelParams = acceleration[0]
 		leaderControls.tick leader.getSpeed(), dt
 

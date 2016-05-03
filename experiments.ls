@@ -3,7 +3,7 @@ P = require 'bluebird'
 seqr = require './seqr.ls'
 {runScenario, newEnv} = require './scenarioRunner.ls'
 scenario = require './scenario.ls'
-{flatten, zip, elem-indices, concat} = require 'prelude-ls'
+{flatten, zip, elem-indices, concat, minimum} = require 'prelude-ls'
 
 L = (s) -> s
 
@@ -72,10 +72,10 @@ export easyrider2016 = seqr.bind ->*
 	yield env
 	
 	# training
-	#yield runUntilPassed scenario.closeTheGap, passes: 3
-	#yield runUntilPassed scenario.throttleAndBrake, passes: 2
-	#yield runUntilPassed scenario.speedControl, passes: 1
-	#yield runUntilPassed scenario.inTraffic, passes: 1
+	yield runUntilPassed scenario.closeTheGap, passes: 3
+	yield runUntilPassed scenario.throttleAndBrake, passes: 2
+	yield runUntilPassed scenario.speedControl, passes: 1
+	yield runUntilPassed scenario.inTraffic, passes: 1
 
 	# experiment
 	blocksize = 4
@@ -109,7 +109,19 @@ export easyrider2016 = seqr.bind ->*
 				assigned[p].push accel_params[select]
 				break
 
-	acp_list.splice 0, 0, [1, 0.1] # FIXME
+	# find the one unassigned value (really terrible, sorry)
+	counts = [[x, (elem-indices x, acp_list).length] for x in accel_params]
+	minval = 99
+	minparam = 0
+	for i in counts
+		if i[1] < minval
+			minval = i[1]
+			minparam = i[0]
+	acp_list.splice 0, 0, minparam
+			
+	#console.log counts
+	#console.log minparam
+
 	seq = [i * (speeds.length+1) for i from 0 to permutations.length]
 	acp_sliced = [acp_list.slice i, i+(speeds.length+1) for i in seq]
 	acp_sliced = acp_sliced.slice  0, -1

@@ -167,7 +167,6 @@ export class TargetSpeedController2
 			targetAccel += ki * @_cumulative_error			
 			#targetAccel += 0.1 * @_cumulative_error #+ 2.0 * @_pid_derivative
 			@_force = DumbEngineModel targetAccel
-			
 			#@_force = tanh targetAccel
 				
 		@_force = Math.max @_force, -1
@@ -179,10 +178,10 @@ export class TargetSpeedController2
 			@brake = -@_force
 			@throttle = 0
 
-		console.log 'speed', @_speed
-		console.log 'target', @target
-		console.log 'kp, ki', kp, ki
-		console.log 'force', @_force
+		#console.log 'speed', @_speed
+		#console.log 'target', @target
+		#console.log 'kp, ki', kp, ki
+		#console.log 'force', @_force
 
 	set: ->
 
