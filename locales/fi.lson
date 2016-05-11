@@ -88,9 +88,9 @@
 'Easy Rider': 'Jonossa ajaminen'
 
 '%easyRider.intro': ({currentSegment, segmentNro}) -> """
-	<p>Ajat ruuhkaisella tiellä jonossa muiden autojen kanssa. Jonon liikkeestä johtuen edelläajava auto jarruttaa ja kiihdyttää silloin tällöin, ja tehtävänäsi on pysyä turvallisen etäisyyden päässä siten, että ajaminen tuntuu mukavalta eikä törmäystä synny. Mikäli törmäät edelläajavaan, joudut ajamaan osion uudelleen. Uudelleenajatettava osio voi olla pitkäkin, joten ole tarkkana!</p>
+	<p>Ajat ruuhkaisella tiellä jonossa muiden autojen kanssa. Jonon liikkeestä johtuen edelläajava auto jarruttaa ja kiihdyttää silloin tällöin, ja tehtävänäsi on pysyä turvallisen etäisyyden päässä siten, että ajaminen tuntuu mukavalta eikä törmäystä synny. Mikäli törmäät edelläajavaan, joudut ajamaan osion uudelleen.</p>
 	<p>Et voi ohittaa edelläajavaa autoa.</p>
-	<p>Kokeessa on kuusi osiota, jotka kestävät noin 5 minuuttia per osio. Koe kestää siis noin puolesta tunnista tuntiin riippuen törmäysten lukumäärästä.</p>
+	<p>Kokeessa on kuusi osiota, jotka kestävät alle 10 minuuttia per osio.</p>
 	<p>Tämä on osio #{currentSegment} / #{segmentNro}</p>
 	"""
 
