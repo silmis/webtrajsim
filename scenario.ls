@@ -456,7 +456,7 @@ class MicrosimWrapper
 	step: ->
 
 {knuthShuffle: shuffleArray} = require 'knuth-shuffle'
-{TargetSpeedController2} = require './controls.ls'
+{TargetSpeedController2, linearTargetSpeedController} = require './controls.ls'
 
 inTraffic = exportScenario \inTraffic, (env) ->*
 	L = env.L
@@ -552,12 +552,10 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 			content: reason
 		return false
 
-	console.log acceleration
-
 	scene.afterPhysics.add (dt) !->
 		return if not startTime?
 
-	leaderControls = new TargetSpeedController2
+	leaderControls = new linearTargetSpeedController
 	leader = yield addVehicle scene, leaderControls
 	leader.physical.position.x = -1.75
 	leader.physical.position.z = 100 #10
@@ -570,10 +568,11 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 
 	speeds = [s/3.6 for s in sequence]
 
-	stayOnSpeedTarget = 5
+	stayOnSpeedTarget = 20
 	stayOnZeroTarget = 5
-	speedTargetSigma = 5
+	speedTargetSigma = 10
 	zeroTargetSigma = 2
+	smoothTarget = 0
 
 	stayOnTarget = stayOnSpeedTarget
 	timeOnTarget = 0
@@ -590,7 +589,7 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 				timeOnTarget += dt
 			else
 				freeToGo := false
-		else if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 0.5
+		else if (Math.abs(speeds[0] - leader.physical.velocity.z)) < 1.0
 			timeOnTarget += dt
 			freeToGo := true
 		else
@@ -601,9 +600,13 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 			acceleration := acceleration.slice(1)
 			timeOnTarget := 0
 			if speeds[0] == 0
-				stayOnTarget := zeroTargetSigma * rnorm(0, 0.5) + stayOnZeroTarget
+				error = zeroTargetSigma * Math.random! - (zeroTargetSigma/2)
+				stayOnTarget := stayOnZeroTarget + error
+				#stayOnTarget := zeroTargetSigma * rnorm(0, 0.5) + stayOnZeroTarget
 			else
-				stayOnTarget := speedTargetSigma * rnorm(0, 0.5) + stayOnSpeedTarget
+				error = speedTargetSigma * Math.random! - (speedTargetSigma/2)
+				stayOnTarget := stayOnSpeedTarget + error
+				#stayOnTarget := speedTargetSigma * rnorm(0, 0.5) + stayOnSpeedTarget
 
 			speedinfo =
 				changeLimit: speeds[0]
@@ -612,6 +615,7 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 			env.logger.write speedinfo
 	
 		#console.log 'go' , freeToGo
+		#console.log 'time target', stayOnTarget
 
 		if speeds.length == 0
 			@let \done, passed: true, outro:
@@ -621,17 +625,25 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 		
 		dist = scene.player.physical.position.distanceTo leader.physical.position
 		dist = dist - scene.player.physical.boundingRadius - leader.physical.boundingRadius
-		
+		#smoothTarget := (smoothTarget * 0.95) + (speeds[0] * 0.05)		
+
 		#console.log 'dist', dist
 		#console.log 'approach', approach
+		#console.log speeds[0], smoothTarget
+
+		#targetInfo =
+		#	smoothTarget: smoothTarget
+		#env.logger.write targetInfo
 			
 		if approach and (dist > 30)
 			leaderControls.target = 0
 		else
 			leaderControls.target = speeds[0]
+			#leaderControls.target = smoothTarget
 			approach := false
 
 		leaderControls.accelParams = acceleration[0]
+		leaderControls.environment = env
 		leaderControls.tick leader.getSpeed(), dt
 
 	headway =
