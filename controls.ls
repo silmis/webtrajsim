@@ -186,7 +186,7 @@ export class TargetSpeedController2
 	set: ->
 
 export class linearTargetSpeedController
-	(@target=0, @accelParams=[1.0, 0.5], @targetAccelMs=2.0, @environment) ->
+	(@target=0, @accelParams=[1.0, 0.1], @targetAccelMs=2.0, @environment) ->
 		@throttle = 0
 		@brake = 0
 		@steering = 0
@@ -213,12 +213,16 @@ export class linearTargetSpeedController
 			@_currentTarget = @target
 			@_cumulativeTarget = @_previousTarget
 
-		if Math.abs (@_currentTarget - @_cumulativeTarget) < 0.2 # at limit
+		if (Math.abs @_currentTarget - @_cumulativeTarget) < 0.2 # at limit
+			console.log 'on limit'
 			@_cumulativeTarget = @target
+		else if @_currentTarget < @_previousTarget # decelerating
+			console.log 'decelaring'
+			@_cumulativeTarget -= @targetAccelMs * dt		
 		else if @_currentTarget > @_previousTarget # accelerating
+			console.log 'accelerating'
 			@_cumulativeTarget += @targetAccelMs * dt
-		else # decelerating
-			@_cumulativeTarget -= @targetAccelMs * dt
+
 		target = @_cumulativeTarget
 
 
@@ -254,6 +258,7 @@ export class linearTargetSpeedController
 		#console.log 'cumtarget', @_cumulativeTarget
 		#console.log 'currentTarget', @_currentTarget
 		#console.log 'previousTarget', @_previousTarget
+		#console.log 'acceltarget', @targetAccelMs
 		#console.log 'target', target
 		#console.log 'kp, ki', kp, ki
 		#console.log 'force', @_force

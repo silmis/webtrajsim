@@ -571,7 +571,7 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 	stayOnSpeedTarget = 20
 	stayOnZeroTarget = 5
 	speedTargetSigma = 10
-	zeroTargetSigma = 2
+	zeroTargetSigma = 4
 	smoothTarget = 0
 
 	stayOnTarget = stayOnSpeedTarget
@@ -625,24 +625,15 @@ easyRider = exportScenario \easyRider, (env, {sequence, acceleration, currentSeg
 		
 		dist = scene.player.physical.position.distanceTo leader.physical.position
 		dist = dist - scene.player.physical.boundingRadius - leader.physical.boundingRadius
-		#smoothTarget := (smoothTarget * 0.95) + (speeds[0] * 0.05)		
 
-		#console.log 'dist', dist
-		#console.log 'approach', approach
-		#console.log speeds[0], smoothTarget
-
-		#targetInfo =
-		#	smoothTarget: smoothTarget
-		#env.logger.write targetInfo
-			
 		if approach and (dist > 30)
 			leaderControls.target = 0
 		else
 			leaderControls.target = speeds[0]
-			#leaderControls.target = smoothTarget
 			approach := false
 
-		leaderControls.accelParams = acceleration[0]
+		#leaderControls.accelParams = acceleration[0]
+		leaderControls.targetAccelMs = acceleration[0]
 		leaderControls.environment = env
 		leaderControls.tick leader.getSpeed(), dt
 

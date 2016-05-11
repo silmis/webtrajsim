@@ -80,7 +80,8 @@ export easyrider2016 = seqr.bind ->*
 	# experiment
 	blocksize = 4
 	speeds = [10, 30, 50, 80]
-	accel_params = [[1.0, 0.1], [0.6, 0.075], [0.4, 0.05]]	
+	accel_params = [1.5, 4.0, 7.0]	
+	#accel_params = [[1.0, 0.1], [0.6, 0.075], [0.4, 0.05]]	
 
 	# speeds
 	permutations = permuteList speeds
