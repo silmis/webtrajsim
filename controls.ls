@@ -214,13 +214,10 @@ export class linearTargetSpeedController
 			@_cumulativeTarget = @_previousTarget
 
 		if (Math.abs @_currentTarget - @_cumulativeTarget) < 0.2 # at limit
-			console.log 'on limit'
 			@_cumulativeTarget = @target
 		else if @_currentTarget < @_previousTarget # decelerating
-			console.log 'decelaring'
 			@_cumulativeTarget -= @targetAccelMs * dt		
 		else if @_currentTarget > @_previousTarget # accelerating
-			console.log 'accelerating'
 			@_cumulativeTarget += @targetAccelMs * dt
 
 		target = @_cumulativeTarget
