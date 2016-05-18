@@ -1,7 +1,7 @@
 $ = require 'jquery'
 deparam = require 'jquery-deparam'
 P = Promise = require 'bluebird'
-Promise.config longStackTraces: true
+#Promise.config longStackTraces: true
 Co = P.coroutine
 seqr = require './seqr.ls'
 
